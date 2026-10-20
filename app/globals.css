@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/* Tokens point at variables so day mode can swap the whole palette at once. */
+@theme inline {
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-amber: var(--amber);
+  --color-pink: var(--pink);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-leaf: var(--leaf);
+
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-grotesk), system-ui, sans-serif;
+}
+
+:root {
+  --night: #060a14;
+  --night-2: #0b1222;
+  --cyan: #6ee7f9;
+  --violet: #a78bfa;
+  --amber: #fbbf24;
+  --pink: #f472b6;
+  --ink: #e6edf7;
+  --muted: #8b98b3;
+  --leaf: #5eead4;
+  --scrim: 6, 10, 20;
+  color-scheme: dark;
+}
+
+/* Day: dark ink on light glass, with deeper accents so they stay readable on a bright sky. */
+html[data-mode="day"] {
+  --night: #dbe8f5;
+  --night-2: #f5f9fd;
+  --cyan: #0e7490;
+  --violet: #6d28d9;
+  --amber: #b45309;
+  --pink: #be185d;
+  --ink: #0b1222;
+  --muted: #3f4c63;
+  --leaf: #3f7d3a;
+  --scrim: 240, 246, 252;
+  color-scheme: light;
+}
+
+html {
+  background: var(--night);
+  transition: background-color 1.2s ease;
+}
+
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: color 1.2s ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--cyan) 35%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hide the native cursor only when the custom one is running (fine pointers). */
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none !important;
+}
+
+.glass {
+  background: color-mix(in srgb, var(--night-2) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 16%, transparent);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  transition: background-color 1.2s ease, border-color 1.2s ease;
+}
+
+.gate-scrim {
+  background: radial-gradient(
+    ellipse at 22% 52%,
+    rgba(var(--scrim), 0.92),
+    rgba(var(--scrim), 0.55) 45%,
+    transparent 78%
+  );
+}
+@media (max-width: 639px) {
+  .gate-scrim { background: rgba(var(--scrim), 0.5); }
+}
+
+.constellation-label {
+  background: color-mix(in srgb, var(--night-2) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.constellation-label:hover,
+.constellation-label:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px -4px var(--accent);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.75); }
+}
+
+@keyframes caret {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes scroll-cue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+.pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+.caret { animation: caret 1s steps(1) infinite; }
+.scroll-cue { animation: scroll-cue 1.8s ease-in-out infinite; }
+
+/* ---------------------------------------------------------------- botanicals */
+
+@keyframes grow-stem {
+  from { stroke-dashoffset: var(--len); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes pop-in {
+  from { transform: scale(0) rotate(-30deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-2.2deg); }
+  50% { transform: rotate(2.2deg); }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@keyframes drift-petal {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate(var(--dx), 140px) rotate(320deg); opacity: 0; }
+}
+
+/* Night: neon outlines that glow. Day: filled petals and leaves, no glow. */
+.botanical { --glow: 0.8; --petal-fill: 0.22; --leaf-fill: 0.15; }
+html[data-mode="day"] .botanical { --glow: 0; --petal-fill: 0.8; --leaf-fill: 0.75; }
+
+.botanical .sway { transform-box: fill-box; animation: sway 7s ease-in-out infinite; }
+.botanical .stem {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  animation: grow-stem 2.4s cubic-bezier(0.3, 0.6, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+.botanical .bud {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation:
+    pop-in 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) forwards var(--delay, 0s),
+    breathe 4.5s ease-in-out infinite calc(var(--delay, 0s) + 0.7s);
+}
+.botanical .leaf {
+  transform-box: fill-box;
+  transform-origin: var(--origin, left center);
+  opacity: 0;
+  animation: pop-in 0.6s ease-out forwards var(--delay, 0s);
+}
+.botanical .petal-fall {
+  animation: drift-petal 9s linear infinite var(--delay, 0s);
+}
+.botanical .neon {
+  filter: drop-shadow(0 0 calc(4px * var(--glow)) currentColor);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot, .caret, .scroll-cue { animation: none; }
+  /* Show the finished drawing as a still frame. */
+  .botanical .sway, .botanical .petal-fall { animation: none; }
+  .botanical .petal-fall { opacity: 0; }
+  .botanical .stem { animation: none; stroke-dashoffset: 0; }
+  .botanical .bud, .botanical .leaf { animation: none; opacity: 1; }
+}
+
+/* ---------------------------------------------------------------- district illustrations */
+/* Every element's resting style is the still frame; the animations only add motion on top. */
+
+.illo * { transform-box: fill-box; transform-origin: center; }
+.illo-glow { filter: drop-shadow(0 0 4px currentColor); }
+html[data-mode="day"] .illo-glow { filter: none; }
+
+@keyframes illo-draw {
+  0% { stroke-dashoffset: 100; opacity: 1; }
+  45%, 80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.illo-draw { stroke-dasharray: 100; animation: illo-draw 5s ease-in-out infinite; }
+
+@keyframes illo-spin { to { rotate: 360deg; } }
+.illo-spin { animation: illo-spin 9s linear infinite; }
+
+@keyframes illo-fall {
+  from { transform: translateY(-200px); }
+  to { transform: translateY(160px); }
+}
+.illo-fall { animation: illo-fall 7s linear infinite; }
+
+@keyframes illo-shackle {
+  0%, 35% { transform: translateY(0); }
+  45%, 75% { transform: translateY(-9px); }
+  85%, 100% { transform: translateY(0); }
+}
+.illo-shackle { animation: illo-shackle 3.6s cubic-bezier(0.5, 0, 0.3, 1.4) infinite; }
+
+@keyframes illo-ring {
+  from { transform: scale(0.55); opacity: 0.9; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+.illo-ring { opacity: 0.5; animation: illo-ring 2.6s ease-out infinite; }
+
+@keyframes illo-flow { to { stroke-dashoffset: -28; } }
+.illo-flow { stroke-dasharray: 3 11; stroke-opacity: 0.8; animation: illo-flow 1.4s linear infinite; }
+
+@keyframes illo-node {
+  0%, 100% { fill-opacity: 0.12; }
+  20% { fill-opacity: 0.85; }
+  45% { fill-opacity: 0.2; }
+}
+.illo-node { fill-opacity: 0.35; animation: illo-node 2.8s ease-in-out infinite; }
+
+@keyframes illo-drift {
+  0%, 100% { transform: translateX(-14px); }
+  50% { transform: translateX(26px); }
+}
+.illo-drift { animation: illo-drift 9s ease-in-out infinite; }
+
+@keyframes illo-drop {
+  0% { transform: translateY(-110px); opacity: 0; }
+  6% { opacity: 1; }
+  16% { transform: translateY(0); }
+  19% { transform: translateY(-4px); }
+  22%, 82% { transform: translateY(0); opacity: 1; }
+  92%, 100% { transform: translateY(0); opacity: 0; }
+}
+.illo-drop { animation: illo-drop 6.5s ease-in infinite both; }
+
+@keyframes illo-packet {
+  from { transform: translateX(0); }
+  to { transform: translateX(255px); }
+}
+.illo-packet { animation: illo-packet 3.3s linear infinite; }
+
+@keyframes illo-wave {
+  from { transform: scale(1); opacity: 0.9; }
+  to { transform: scale(7); opacity: 0; }
+}
+.illo-wave { opacity: 0.4; transform: scale(3); animation: illo-wave 3s ease-out infinite; }
+
+@keyframes illo-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.illo-bob { animation: illo-bob 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .illo, .illo * { animation: none !important; transition: none !important; }
+}
